@@ -6,6 +6,22 @@ const QuoteSchema = new Schema({
   quote:{
     type: String,
     require: true
+  },
+  author:{
+    type: String,
+    require: true
+  },
+  typo:{
+    type: String,
+    require: true
+  },
+  color:{
+    type: String,
+    require: true
+  },
+  date:{
+    type: Date,
+    default: Date.now
   }
 });
 
