@@ -11,6 +11,10 @@ const QuoteSchema = new Schema({
     type: String,
     require: true
   },
+  published:{
+    type: Boolean,
+    default: false
+  },
   typo:{
     type: String,
     require: true
@@ -18,6 +22,16 @@ const QuoteSchema = new Schema({
   color:{
     type: String,
     require: true
+  },
+  category:{
+    health: {
+      type: Boolean,
+      require: true
+    },
+    entrepreneurship: {
+      type: Boolean,
+      require: true
+    }
   },
   date:{
     type: Date,
