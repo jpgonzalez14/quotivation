@@ -3,15 +3,16 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const passport = require('passport');
 
+//Load input validation
+const validateQuoteInput = require('../../validation/quote');
 //Load model
 const Quote = require('../../models/Quote');
 const User = require('../../models/User');
 
-
 //@route  GET api/quotes/quotes
 //@desc   get a quote
 //@access Public
-router.get('/current', (req, res) => {
+router.post('/current', (req, res) => {
   const errors = {};
   Quote.findOne({ quote: req.body.quote }).then(quote => {
     if (quote) {
@@ -27,7 +28,11 @@ router.get('/current', (req, res) => {
 //@desc   create quote
 //@access Public
 router.post('/create', (req, res) => {
-  const errors = {};
+  const { errors, isValid } = validateQuoteInput(req.body);
+  //Check validation
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
   Quote.findOne({ quote: req.body.quote }).then(quote => {
     if (quote) {
       errors.noprofile = 'Quote allready exist';
@@ -67,10 +72,17 @@ router.get('/list', (req, res) => {
 //@desc   edit an existing quote
 //@access Private
 router.post('/edit', passport.authenticate('jwt', { session: false }), (req, res) => {
-  const errors = {};
+  const { errors, isValid } = validateQuoteInput(req.body);
+  //Check validation
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
   Quote.findOne({ quote: req.body.quote }).then(quote => {
     if (quote) {
       Quote.findOneAndUpdate(
+        {
+          quote: req.body.quote
+        },
         {
           $set: {
             quote: req.body.quote,
@@ -95,8 +107,17 @@ router.post('/edit', passport.authenticate('jwt', { session: false }), (req, res
 //@route  DELETE api/quotes/delete
 //@desc   delete existing quote
 //@access Private
-router.get('/delete', passport.authenticate('jwt', { session: false }), (req, res) => {
+router.post('/delete', passport.authenticate('jwt', { session: false }), (req, res) => {
+  const errors = {};
 
+  Quote.findOne({ quote: req.body.quote }).then(quote => {
+    if (quote) {
+      Quote.findOneAndDelete({ quote: req.body.quote }).then(quote => res.json(quote));
+    } else {
+      errors.noQuote = 'Quote does not exist';
+      return res.status(404).json(errors);
+    }
+  }).catch(err => res.status(404).json(err));
 });
 
 module.exports = router;
